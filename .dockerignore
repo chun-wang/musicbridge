@@ -8,4 +8,3 @@ music/
 .gitignore
 docker-compose.yml
 test/
-tsconfig.json
