@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+music/
+.env
+*.log
+.git/
+.gitignore
+Dockerfile
+docker-compose.yml
+test/
+tsconfig.json
