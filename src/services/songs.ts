@@ -46,9 +46,10 @@ export async function createSong(input: CreateSongInput): Promise<Song> {
   if (song.url) {
     const fileStem = `${song.title}-${song.author}`;
     const songUrl = song.url;
+    const artistDir = path.join(env.MUSIC_DIR, song.author);
     const lockKey = `song:${fileStem}`;
     await withFileLock(lockKey, async () => {
-      const download = await downloadSong(songUrl, env.MUSIC_DIR, fileStem);
+      const download = await downloadSong(songUrl, artistDir, fileStem);
       if (!download.tempPath) {
         throw new AppError(502, 'Failed to download song: no file produced');
       }
@@ -60,14 +61,14 @@ export async function createSong(input: CreateSongInput): Promise<Song> {
         lyrics: song.lyrics,
         coverPath,
       });
-      const finalPath = path.join(env.MUSIC_DIR, download.fileName);
+      const finalPath = path.join(artistDir, download.fileName);
       await rm(finalPath, { force: true });
       await rename(download.tempPath, finalPath);
       if (coverPath) {
         await rm(coverPath, { force: true });
       }
       song.download = {
-        fileName: download.fileName,
+        fileName: path.join(song.author, download.fileName),
         size: download.size,
         downloadedAt: download.downloadedAt,
       };

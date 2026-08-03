@@ -1,4 +1,5 @@
 import request from 'supertest';
+import path from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../src/app';
 import { clearSongs } from '../src/services/songs';
@@ -83,7 +84,7 @@ describe('POST /api/songs', () => {
     expect(res.status).toBe(201);
     expect(vi.mocked(downloadSong)).toHaveBeenCalledWith(
       'https://example.com/qing-tian.mp3',
-      'music',
+      path.join('music', '周杰伦'),
       '晴天-周杰伦',
     );
     expect(vi.mocked(downloadImage)).not.toHaveBeenCalled();
@@ -95,7 +96,7 @@ describe('POST /api/songs', () => {
       createdAt: '2003-07-31',
       url: 'https://example.com/qing-tian.mp3',
       download: {
-        fileName: 'song.mp3',
+        fileName: path.join('周杰伦', 'song.mp3'),
         size: 1024,
         downloadedAt: '2026-08-01T00:00:00.000Z',
       },
