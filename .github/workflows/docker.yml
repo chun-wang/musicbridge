@@ -24,7 +24,7 @@ jobs:
       - name: Checkout Music Square
         uses: actions/checkout@v7
         with:
-          repository: CharlesPikachu/musicsquare
+          repository: chun-wang/musicsquare
           path: html
     
       - name: Set up Docker Buildx
