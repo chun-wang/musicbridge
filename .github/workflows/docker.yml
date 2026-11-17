@@ -21,7 +21,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         
-      - name: Checkout tools repo
+      - name: Checkout Music Square
         uses: actions/checkout@v7
         with:
           repository: CharlesPikachu/musicsquare
