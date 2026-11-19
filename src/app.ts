@@ -5,6 +5,7 @@ import { logger } from './config/logger';
 import { errorHandler } from './middlewares/errorHandler';
 import { htmlTransformMiddleware } from './middlewares/htmlInjector';
 import { notFoundHandler } from './middlewares/notFoundHandler';
+import favoritesRouter from './routes/favorites';
 import songsRouter from './routes/songs';
 
 const HTML_DIR = path.join(__dirname, '..', 'html');
@@ -22,6 +23,7 @@ export function createApp(): express.Express {
   });
 
   app.use('/api/songs', songsRouter);
+  app.use('/api/favorites', favoritesRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
