@@ -1,9 +1,11 @@
 import { execFile } from 'node:child_process';
-import { rename, rm } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { rm } from 'node:fs/promises';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { env } from '../config/env';
 import { logger } from '../config/logger';
+import { ensureTempDir, moveFile } from './temp';
 
 const execFileAsync = promisify(execFile);
 
@@ -26,10 +28,10 @@ const SUPPORTED_EXTENSIONS = new Set([
   '.wav',
 ]);
 
-function getTempPath(src: string): string {
+async function getTempPath(src: string): Promise<string> {
   const ext = path.extname(src);
-  const basename = path.basename(src).slice(0, -ext.length);
-  return path.join(path.dirname(src), `${basename}.ffmetadata${ext}`);
+  const tempDir = await ensureTempDir('metadata');
+  return path.join(tempDir, `${randomUUID()}.ffmetadata${ext}`);
 }
 
 export async function embedMetadata(filePath: string, metadata: SongMetadata): Promise<void> {
@@ -44,7 +46,7 @@ export async function embedMetadata(filePath: string, metadata: SongMetadata): P
   if (metadata.album) tags.album = metadata.album;
   if (metadata.lyrics) tags.lyrics = metadata.lyrics;
 
-  const dst = getTempPath(filePath);
+  const dst = await getTempPath(filePath);
   const args = ['-y', '-i', filePath];
 
   if (metadata.coverPath) {
@@ -68,7 +70,7 @@ export async function embedMetadata(filePath: string, metadata: SongMetadata): P
     await execFileAsync(env.FFMPEG_PATH, args, {
       maxBuffer: 10 * 1024 * 1024,
     });
-    await rename(dst, filePath);
+    await moveFile(dst, filePath);
   } catch (err) {
     await rm(dst, { force: true });
     logger.warn({ filePath, err }, 'Failed to embed metadata into audio file');

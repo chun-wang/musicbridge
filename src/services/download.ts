@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { AppError } from '../errors/AppError';
+import { ensureTempDir } from './temp';
 
 export interface DownloadResult {
   fileName: string;
@@ -100,7 +101,8 @@ export async function downloadSong(
   const contentType = response.headers.get('content-type') ?? '';
   const ext = urlExt || getExtensionFromContentType(contentType) || '.mp3';
   const fileName = `${sanitizeFileStem(fileStem)}${ext}`;
-  const tempPath = path.join(destDir, `.${fileName}.${randomUUID()}.part${ext}`);
+  const tempDir = await ensureTempDir('downloads');
+  const tempPath = path.join(tempDir, `.${fileName}.${randomUUID()}.part${ext}`);
 
   const writeStream = createWriteStream(tempPath);
   await pipeline(response.body, writeStream);

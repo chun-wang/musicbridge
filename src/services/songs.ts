@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto';
-import { rename, rm } from 'node:fs/promises';
-import os from 'node:os';
+import { rm } from 'node:fs/promises';
 import path from 'node:path';
 import { env } from '../config/env';
 import { AppError } from '../errors/AppError';
 import { downloadImage, downloadSong } from './download';
 import { embedMetadata } from './tags';
+import { ensureTempDir, moveFile } from './temp';
 import type { CreateSongInput, Song } from '../types/song';
 
 const songs = new Map<string, Song>();
@@ -63,7 +63,7 @@ export async function createSong(input: CreateSongInput): Promise<Song> {
       });
       const finalPath = path.join(artistDir, download.fileName);
       await rm(finalPath, { force: true });
-      await rename(download.tempPath, finalPath);
+      await moveFile(download.tempPath, finalPath);
       if (coverPath) {
         await rm(coverPath, { force: true });
       }
@@ -83,7 +83,7 @@ async function downloadCoverIfPresent(song: Song): Promise<string | undefined> {
   if (!song.cover) {
     return undefined;
   }
-  const destDir = path.join(os.tmpdir(), 'music-connect-covers');
+  const destDir = await ensureTempDir('covers');
   const fileName = `${song.id}-cover`;
   const result = await downloadImage(song.cover, destDir, fileName);
   return path.join(destDir, result.fileName);
